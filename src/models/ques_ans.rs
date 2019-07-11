@@ -6,7 +6,7 @@ use crate::schema::question_answer;
 #[derive(Serialize, Deserialize)]
 pub struct QAlist(pub Vec<QA>);
 
-#[derive(Queryable, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct QA {
     pub id: i32,
     pub title: Option<String>,
@@ -15,7 +15,7 @@ pub struct QA {
     pub created_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, Deserialize, Serialize, AsChangeset, Debug, Clone, PartialEq, Associations)]
+#[derive(Insertable, Deserialize, Serialize, AsChangeset, Debug, Clone, Associations, PartialEq)]
 #[belongs_to(User)]
 #[table_name="question_answer"]
 pub struct NewQA {
@@ -68,22 +68,36 @@ impl QA {
         question_answer::table.find(id).first(connection)
     }
 
-    pub fn destroy(id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+    pub fn destroy(id: &i32, 
+                param_user_id: i32,
+                connection: &PgConnection) -> Result<(), diesel::result::Error> {
         use diesel::QueryDsl;
         use diesel::RunQueryDsl;
+        use diesel::ExpressionMethods;
         use crate::schema::question_answer::dsl;
 
-        diesel::delete(dsl::question_answer.find(id)).execute(connection)?;
+        diesel::delete(dsl::question_answer
+        .filter(dsl::user_id.eq(param_user_id))
+        .find(id))
+        .execute(connection)?;
         Ok(())
     }
 
-    pub fn update(id: &i32,new_qa : &NewQA, connection: &PgConnection) -> Result<(), diesel::result::Error>{
+    pub fn update(id: &i32, param_user_id: i32, new_qa : &NewQA, connection: &PgConnection) -> 
+    Result<(), diesel::result::Error>{
         use diesel::RunQueryDsl;
         use diesel::QueryDsl;
+        use diesel::ExpressionMethods;
         use crate::schema::question_answer::dsl;
 
-        diesel::update(dsl::question_answer.find(id))
-            .set(new_qa)
+        let new_qa_replace = NewQA {
+            user_id: Some(param_user_id),
+            ..new_qa.clone()
+        };
+
+        diesel::update(dsl::question_answer.filter(dsl::user_id.eq(param_user_id))
+            .find(id))
+            .set(new_qa_replace)
             .execute(connection)?;
             Ok(())
     }   

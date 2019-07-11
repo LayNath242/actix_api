@@ -95,7 +95,7 @@ fn main() {
             web::resource("/qa/{id}")
                 .route(web::get().to(handlers::ques_ans::show))
                 .route(web::patch().to(handlers::ques_ans::update))
-                .route(web::patch().to(handlers::ques_ans::destroy))
+                .route(web::delete().to(handlers::ques_ans::destroy))
         )
         .service(
             web::resource("/register")

@@ -1,20 +1,20 @@
 use actix_web::{HttpResponse, Result, web};
 use crate::handlers::pg_pool_handler;
 use crate::db_connection::PgPool;
-use crate::models::ques_ans::{QA, NewQA, QAlist};
+use crate::models::comment::{Comment, NewComment, Commentlist};
 use crate::handlers::LoggedUser;
 
 pub fn index(_user: LoggedUser, pool: web::Data<PgPool>) -> Result<HttpResponse> {
     let pg_pool = pg_pool_handler(pool)?;
-    Ok(HttpResponse::Ok().json(QAlist::list(&pg_pool)))
+    Ok(HttpResponse::Ok().json(Commentlist::list(&pg_pool)))
 }
 
-pub fn create(user: LoggedUser, new_qa: web::Json<NewQA> ,pool: web::Data<PgPool>) ->Result<HttpResponse> {
+pub fn create(user: LoggedUser, new_comment: web::Json<NewComment> ,pool: web::Data<PgPool>) ->Result<HttpResponse> {
     let pg_pool = pg_pool_handler(pool)?;
 
-    new_qa
+    new_comment
         .create(user.id, &pg_pool)
-        .map(|product| HttpResponse::Ok().json(product))
+        .map(|comment| HttpResponse::Ok().json(comment))
         .map_err(|e| {
             actix_web::error::ErrorInternalServerError(e)
         })
@@ -23,8 +23,8 @@ pub fn create(user: LoggedUser, new_qa: web::Json<NewQA> ,pool: web::Data<PgPool
 
 pub fn show(_user: LoggedUser, id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse>{
     let pg_pool = pg_pool_handler(pool)?;
-    QA::find(&id, &pg_pool)
-        .map(|qa| HttpResponse::Ok().json(qa))
+    Comment::find(&id, &pg_pool)
+        .map(|comment| HttpResponse::Ok().json(comment))
         .map_err(|e| {
             actix_web::error::ErrorInternalServerError(e)
         })
@@ -32,9 +32,9 @@ pub fn show(_user: LoggedUser, id: web::Path<i32>, pool: web::Data<PgPool>) -> R
 }
 
 
-pub fn destroy(user: LoggedUser, id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse> {
+pub fn destroy(_user: LoggedUser, id: web::Path<i32>, pool: web::Data<PgPool>) -> Result<HttpResponse> {
     let pg_pool = pg_pool_handler(pool)?;
-    QA::destroy(&id, user.id, &pg_pool)
+    Comment::destroy(&id, &pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|e| {
             actix_web::error::ErrorInternalServerError(e)
@@ -42,13 +42,9 @@ pub fn destroy(user: LoggedUser, id: web::Path<i32>, pool: web::Data<PgPool>) ->
 }
 
 
-pub fn update(user: LoggedUser, 
-                id: web::Path<i32>, 
-                new_qa: web::Json<NewQA>, 
-                pool: web::Data<PgPool>) -> Result<HttpResponse> {
+pub fn update(_user: LoggedUser, id: web::Path<i32>, new_comment: web::Json<NewComment>, pool: web::Data<PgPool>) -> Result<HttpResponse> {
     let pg_pool = pg_pool_handler(pool)?;
-
-    QA::update(&id, user.id, &new_qa, &pg_pool)
+    Comment::update(&id, &new_comment, &pg_pool)
         .map(|_| HttpResponse::Ok().json(()))
         .map_err(|e| {
             actix_web::error::ErrorInternalServerError(e)
