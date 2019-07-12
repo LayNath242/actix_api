@@ -6,7 +6,7 @@ use crate::schema::comments;
 #[derive(Serialize, Deserialize)]
 pub struct Commentlist(pub Vec<Comment>);
 
-#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Comment {
     pub id: i32,
     pub descriton: Option<String>,
@@ -14,7 +14,7 @@ pub struct Comment {
     pub created_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, Deserialize, Serialize, AsChangeset, Debug, Clone, Associations)]
+#[derive(Insertable, Deserialize, Serialize, AsChangeset, Debug, Clone, Associations ,PartialEq)]
 #[belongs_to(User)]
 #[table_name="comments"]
 pub struct NewComment {
@@ -33,7 +33,7 @@ impl Commentlist {
             comments
                 .limit(10)
                 .load::<Comment>(connection)
-                .expect("Error loading roles");
+                .expect("Error loading comment");
 
         Commentlist(result)
     }
@@ -66,22 +66,41 @@ impl Comment {
         comments::table.find(id).first(connection)
     }
 
-    pub fn destroy(id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+    pub fn destroy(id: &i32, 
+                param_user_id: i32,
+                connection: &PgConnection) -> Result<(), diesel::result::Error> {
         use diesel::QueryDsl;
         use diesel::RunQueryDsl;
+        use diesel::ExpressionMethods;
         use crate::schema::comments::dsl;
 
-        diesel::delete(dsl::comments.find(id)).execute(connection)?;
+        diesel::delete(dsl::comments
+        .filter(dsl::user_id.eq(param_user_id))
+        .find(id))
+        .execute(connection)?;
         Ok(())
     }
 
-    pub fn update(id: &i32,new_comment : &NewComment, connection: &PgConnection) -> Result<(), diesel::result::Error>{
+
+    pub fn update(id: &i32,
+                  param_user_id: i32,
+                  new_comment : &NewComment, 
+                  connection: &PgConnection) 
+                  -> Result<(), diesel::result::Error>{
         use diesel::RunQueryDsl;
         use diesel::QueryDsl;
+        use diesel::ExpressionMethods;
         use crate::schema::comments::dsl;
 
+        let new_comment_replace = NewComment {
+            user_id: Some(param_user_id),
+            ..new_comment.clone()
+        };
+
+
         diesel::update(dsl::comments.find(id))
-            .set(new_comment)
+            .filter(dsl::user_id.eq(param_user_id))
+            .set(new_comment_replace)
             .execute(connection)?;
             Ok(())
     }   

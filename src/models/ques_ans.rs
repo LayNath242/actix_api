@@ -35,7 +35,7 @@ impl QAlist {
             question_answer
                 .limit(10)
                 .load::<QA>(connection)
-                .expect("Error loading roles");
+                .expect("Error loading comment");
 
         QAlist(result)
     }

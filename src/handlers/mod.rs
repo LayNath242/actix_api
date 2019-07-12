@@ -3,6 +3,7 @@ pub mod register;
 pub mod authentication;
 pub mod ques_ans;
 pub mod comments;
+pub mod categories;
 
 
 use actix_web::web;

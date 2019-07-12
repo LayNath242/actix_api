@@ -65,4 +65,15 @@ impl Role {
             .execute(connection)?;
             Ok(())
     }
+
+    pub fn destroy(id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+        use diesel::RunQueryDsl;
+        use diesel::QueryDsl;
+        use crate::schema::roles::dsl;
+
+        diesel::delete(dsl::roles.find(id))
+        .execute(connection)?;
+        Ok(())
+                
+    }
 }

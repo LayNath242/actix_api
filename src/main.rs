@@ -52,7 +52,7 @@ fn main() {
             IdentityService::new(
                 CookieIdentityPolicy::new(dotenv!("SECRET_KEY").as_bytes())
                     .domain(dotenv!("MYSTOREDOMAIN"))
-                    .name("mystorejwt")
+                    .name("koompijwt")
                     .path("/")
                     .max_age(Duration::days(1).num_seconds())
                     .secure(dotenv!("COOKIE_SECURE").parse().unwrap())
@@ -82,21 +82,53 @@ fn main() {
                 .route(web::post().to(handlers::roles::create))
         )
         .service(
+            web::resource("/roles/{id}")
+                .route(web::get().to(handlers::roles::show))
+                .route(web::patch().to(handlers::roles::update))
+                .route(web::delete().to(handlers::roles::destroy))
+        )
+
+
+        .service(
             web::resource("/qa")
                 .route(web::get().to(handlers::ques_ans::index))
                 .route(web::post().to(handlers::ques_ans::create))
         )
-        .service(
-            web::resource("/roles/{id}")
-                .route(web::get().to(handlers::roles::show))
-                .route(web::patch().to(handlers::roles::update))
-        )
+        
         .service(
             web::resource("/qa/{id}")
                 .route(web::get().to(handlers::ques_ans::show))
                 .route(web::patch().to(handlers::ques_ans::update))
                 .route(web::delete().to(handlers::ques_ans::destroy))
         )
+
+
+        .service(
+            web::resource("/comment")
+                .route(web::get().to(handlers::comments::index))
+                .route(web::post().to(handlers::comments::create))
+        )
+        
+        .service(
+            web::resource("/comment/{id}")
+                .route(web::get().to(handlers::comments::show))
+                .route(web::patch().to(handlers::comments::update))
+                .route(web::delete().to(handlers::comments::destroy))
+        )
+
+        .service(
+            web::resource("/categorie")
+                .route(web::get().to(handlers::categories::index))
+                .route(web::post().to(handlers::categories::create))
+        )
+        
+        .service(
+            web::resource("/categorie/{id}")
+                .route(web::get().to(handlers::categories::show))
+                .route(web::patch().to(handlers::categories::update))
+                .route(web::delete().to(handlers::categories::destroy))
+        )
+
         .service(
             web::resource("/register")
                 .route(web::post().to(handlers::register::register))
