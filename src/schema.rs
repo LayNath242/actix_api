@@ -8,7 +8,7 @@ table! {
 
 table! {
     users (id) {
-        id -> Int4,
+        id -> Uuid,
         fullname -> Varchar,
         email -> Varchar,
         password -> Varchar,

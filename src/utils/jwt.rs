@@ -1,17 +1,18 @@
 use jwt::{decode, encode, Header, Validation};
 use chrono::{Local, Duration};
 use actix_web::HttpResponse;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    sub: i32,
+    sub: Uuid,
     name: String,
     fullname: String,
     exp: usize
 }
 
 pub struct SlimUser {
-    pub id: i32,
+    pub id: Uuid,
     pub email: String,
     pub fullname: String
 }
@@ -27,7 +28,7 @@ impl From<Claims> for SlimUser {
 }
 
 impl Claims {
-    fn with_email(id: i32, email: &str, fullname: &str) -> Self {
+    fn with_email(id: Uuid, email: &str, fullname: &str) -> Self {
         Claims {
             sub: id,
             name: email.into(),
@@ -37,7 +38,7 @@ impl Claims {
     }
 }
 
-pub fn create_token(id: i32, email: &str, fullname: &str) -> Result<String, HttpResponse> {
+pub fn create_token(id: Uuid, email: &str, fullname: &str) -> Result<String, HttpResponse> {
     let claims = Claims::with_email(id, email, fullname);
     encode(&Header::default(), &claims, get_secret())
         .map_err(|e| HttpResponse::InternalServerError().json(e.to_string()))

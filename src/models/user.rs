@@ -1,6 +1,7 @@
 use chrono::{NaiveDateTime, Local};
 use crate::schema::{users, roles};
 use crate::models::role::Role;
+use uuid::Uuid;
 
 use bcrypt::{hash, DEFAULT_COST};
 use diesel::PgConnection;
@@ -12,7 +13,7 @@ use crate::errors::MyError;
 #[table_name = "users"]
 pub struct User {
     #[serde(skip)]
-    pub id: i32,
+    pub id: Uuid,
     pub fullname: String,
     pub email: String,
     #[serde(skip)]
@@ -26,6 +27,7 @@ pub struct User {
 #[derive(Debug, Serialize, Deserialize, Insertable)]
 #[table_name = "users"]
 pub struct NewUser {
+    pub id: Uuid,
     pub fullname: String,
     pub email: String,
     pub password: String,
@@ -40,7 +42,7 @@ pub struct NewUser {
 
 #[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct UserRole {
-    pub id: i32,
+    pub id: Uuid,
     pub email: String,
     #[serde(skip)]
     pub password: String,
@@ -84,6 +86,7 @@ impl User {
 
         Ok(diesel::insert_into(users::table)
             .values(NewUser {
+                id: Uuid::new_v4(),
                 fullname: register_user.fullname,
                 email: register_user.email,
                 password: Self::hash_password(register_user.password)?,
