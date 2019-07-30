@@ -6,6 +6,7 @@ CREATE TABLE users (
   avatar VARCHAR NULL,
   biography VARCHAR NULL,
   created_at TIMESTAMP NOT NULL,
-  role_id SERIAL NOT NULL REFERENCES roles(id) ON UPDATE CASCADE DEFAULT 3
+  role_id SERIAL NOT NULL REFERENCES roles(id) ON UPDATE CASCADE,
+  CHECK (email <> '')
 );
 CREATE INDEX users_email_name_idx ON users (email, fullname);

@@ -63,7 +63,7 @@ impl Role {
         diesel::update(dsl::roles.find(id))
             .set(new_role)
             .execute(connection)?;
-            Ok(())
+            Ok(())    
     }
 
     pub fn destroy(id: &i32, connection: &PgConnection) -> Result<(), diesel::result::Error> {

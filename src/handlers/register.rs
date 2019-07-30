@@ -1,9 +1,8 @@
-use actix_web::web;
+use actix_web::{web, HttpResponse, Result};
 use crate::db_connection::PgPool;
-use actix_web::HttpResponse;
 use crate::handlers::pg_pool_handler;
+use crate::models::user::{ User, RegisterUser};
 
-use crate::models::user::{ User, RegisterUser };
 
 pub fn register(new_user: web::Json<RegisterUser>, pool: web::Data<PgPool>) ->
  Result<HttpResponse, HttpResponse> {
@@ -20,3 +19,4 @@ pub fn register(new_user: web::Json<RegisterUser>, pool: web::Data<PgPool>) ->
            HttpResponse::InternalServerError().json(e.to_string())
         })
 }
+
